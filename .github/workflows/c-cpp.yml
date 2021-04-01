@@ -11,7 +11,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - uses: actions/checkout@v2
     - name: make_client
-      run: cd client/ && make
+      run: make client/
     - name: make_server
-      run: cd server/ && make
+      run: make server/
