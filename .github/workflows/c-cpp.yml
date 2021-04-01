@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: make client
-      run: make client/
-    - name: make server
-      run: make server/
+    - name: make_client
+      run: cd client/ && make
+    - name: make_server
+      run: cd server/ && make
