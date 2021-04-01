@@ -54,3 +54,6 @@ dkms.conf
 # Executable files
 client/client
 server/server
+
+# Vscode stuff
+settings.json
