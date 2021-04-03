@@ -20,8 +20,11 @@
 
 int get_random_port();
 void send_udp_port_to_group(int project_id, Project* projects);
+
 int get_server_port(int argc, char* argv[]);
 void run_server_on_port(int port);
+int run_tcp_socket(int port);
+
 void write_server_startup_msg(int port);
 void send_available_projects_info(int fd, Project* projects);
 

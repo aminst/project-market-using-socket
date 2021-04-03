@@ -13,7 +13,7 @@ int get_random_port()
         getsockname(test_sock, (struct sockaddr *)&addr, &len );
     }
     close(test_sock);
-    return addr.sin_port;  
+    return addr.sin_port;
 }
 
 void send_udp_port_to_group(int project_id, Project* projects)
@@ -63,10 +63,8 @@ void send_available_projects_info(int fd, Project* projects)
     send(fd, projects_info, strlen(projects_info), 0);
 }
 
-void run_server_on_port(int port)
+int run_tcp_socket(int port)
 {
-    Project* projects = get_initial_projects();
-
     struct sockaddr_in server_sin;
 
     int server_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -102,6 +100,15 @@ void run_server_on_port(int port)
         write(1, listen_error_msg, strlen(listen_error_msg));
         exit(EXIT_FAILURE);
     }
+
+    return server_fd;
+}
+
+void run_server_on_port(int port)
+{
+    Project* projects = get_initial_projects();
+
+    int server_fd = run_tcp_socket(port);
 
     write_server_startup_msg(port);
 
