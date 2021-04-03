@@ -14,9 +14,7 @@ void write_server_startup_msg(int port)
 {
     const char* server_run_msg = "Server Is Running On Port ";
     write(1, server_run_msg, strlen(server_run_msg));
-    char port_str[10];
-    snprintf(port_str, sizeof(port_str), "%d", port);
-    write(1, port_str, strlen(port_str));
+    write(1, int_to_str(port), strlen(int_to_str(port)));
     const char* waiting_for_users_connect_msg = "\nWating For Users to connect\n";
     write(1, waiting_for_users_connect_msg, strlen(waiting_for_users_connect_msg));    
 }

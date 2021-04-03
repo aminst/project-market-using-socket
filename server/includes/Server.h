@@ -10,6 +10,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#include "Utils.h"
+
 #define DEFAULT_SERVER_PORT 5500
 #define MAX_CONNECTIONS 50
 #define MAX_BUFFER_SIZE 2048
