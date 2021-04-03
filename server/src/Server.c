@@ -13,7 +13,6 @@ int get_random_port()
         getsockname(test_sock, (struct sockaddr *)&addr, &len );
     }
     close(test_sock);
-    printf("%d", addr.sin_port);
     return addr.sin_port;  
 }
 
