@@ -16,5 +16,6 @@
 
 int get_server_port(int argc, char* argv[]);
 void run_server_on_port(int port);
+void write_server_startup_msg(int port);
 
 #endif

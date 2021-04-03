@@ -10,6 +10,17 @@ int get_server_port(int argc, char* argv[])
     }
 }
 
+void write_server_startup_msg(int port)
+{
+    const char* server_run_msg = "Server Is Running On Port ";
+    write(1, server_run_msg, strlen(server_run_msg));
+    char port_str[10];
+    snprintf(port_str, sizeof(port_str), "%d", port);
+    write(1, port_str, strlen(port_str));
+    const char* waiting_for_users_connect_msg = "\nWating For Users to connect\n";
+    write(1, waiting_for_users_connect_msg, strlen(waiting_for_users_connect_msg));    
+}
+
 void run_server_on_port(int port)
 {
     struct sockaddr_in server_sin;
@@ -47,6 +58,8 @@ void run_server_on_port(int port)
         write(1, listen_error_msg, strlen(listen_error_msg));
         exit(EXIT_FAILURE);
     }
+
+    write_server_startup_msg(port);
 
     struct sockaddr_in client_sin;
     int client_in_len;
