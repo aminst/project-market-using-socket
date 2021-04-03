@@ -10,11 +10,14 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 
+#include "Utils.h"
+
 #define DEFAULT_SERVER_PORT 5500
 #define MAX_BUFFER_SIZE 2048
 
 int get_server_port(int argc, char* argv[]);
 void run_client(int port);
 
+void write_port_id_msg(char* port, char* id);
 
 #endif

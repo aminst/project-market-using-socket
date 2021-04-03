@@ -10,6 +10,18 @@ int get_server_port(int argc, char* argv[])
     }
 }
 
+void write_port_id_msg(char* port_str, char* id_str)
+{
+    char temp[200] = {0};
+    strcat(temp, "Got Port: ");
+    strcat(temp, port_str);
+    strcat(temp, " From Server!\n");
+    strcat(temp, "Got Id: ");
+    strcat(temp, id_str);
+    strcat(temp, " From Server!\n");
+    write(1, temp, strlen(temp));
+}
+
 void run_client(int port)
 {
     int client_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -24,7 +36,7 @@ void run_client(int port)
     server_sin.sin_addr.s_addr = inet_addr("127.0.0.1");;
     server_sin.sin_family = AF_INET;
 
-    if (connect(client_fd,(struct sockaddr*)&server_sin, sizeof(server_sin)) == -1)
+    if (connect(client_fd, (struct sockaddr*)&server_sin, sizeof(server_sin)) == -1)
     {
         const char* connect_error_msg = "Connect Error!\n";
         write(1, connect_error_msg, strlen(connect_error_msg));
@@ -51,6 +63,46 @@ void run_client(int port)
 
     char* udp_port_str = strtok(udp_port_id, "|");
     char* id_str = strtok(NULL, "|");
+
+    write_port_id_msg(udp_port_str, id_str);
+
+    int udp_socket_fd;
+    if ((udp_socket_fd = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
+    {
+        const char* udp_socket_create_error_msg = "UDP Socket Creation Error!\n";
+        write(1, udp_socket_create_error_msg, strlen(udp_socket_create_error_msg));
+        exit(EXIT_FAILURE);
+    }
+
+    int broadcast = 1;
+    if (setsockopt(udp_socket_fd, SOL_SOCKET, SO_BROADCAST, (char *)&broadcast, sizeof(broadcast)) == -1)
+    {
+        const char* udp_socket_set_option_error = "UDP Socket Set Option Error!\n";
+        write(1, udp_socket_set_option_error, strlen(udp_socket_set_option_error));
+        exit(EXIT_FAILURE);
+    }
+
+    int opt = 1;
+    if (setsockopt(udp_socket_fd, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt)) == -1)
+    {
+        const char* udp_socket_set_option_error = "UDP Socket Set Option Error!\n";
+        write(1, udp_socket_set_option_error, strlen(udp_socket_set_option_error));
+        exit(EXIT_FAILURE);        
+    }
+
+    struct sockaddr_in udp_sin;
+    udp_sin.sin_family = AF_INET;
+    udp_sin.sin_port = htons(atoi(udp_port_str));
+    udp_sin.sin_addr.s_addr = inet_addr("255.255.255.255");
+
+    if (bind(udp_socket_fd, (struct sockaddr *)&udp_sin, sizeof(udp_sin)) == -1)
+    {
+        const char* udp_bind_error_msg = "UDP Bind Error!\n";
+        write(1, udp_bind_error_msg, strlen(udp_bind_error_msg));
+        exit(EXIT_FAILURE);
+    }
+
+
 
     close(client_fd);    
 }

@@ -7,7 +7,8 @@ CFLAGS = -I$(INCLUDE_DIR)
 
 OBJECTS = \
 	$(BUILD_DIR)/Main.o \
-	$(BUILD_DIR)/Client.o
+	$(BUILD_DIR)/Client.o \
+	$(BUILD_DIR)/Utils.o
 
 all: Client
 
@@ -22,6 +23,9 @@ $(BUILD_DIR)/Main.o: $(SRC_DIR)/Main.c $(INCLUDE_DIR)/Client.h
 
 $(BUILD_DIR)/Client.o: $(SRC_DIR)/Client.c $(INCLUDE_DIR)/Client.h
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/Client.c -o $(BUILD_DIR)/Client.o
+
+$(BUILD_DIR)/Utils.o: $(SRC_DIR)/Utils.c $(INCLUDE_DIR)/Utils.h
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/Utils.c -o $(BUILD_DIR)/Utils.o
 
 .PHONY: clean
 clean:
