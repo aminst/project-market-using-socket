@@ -57,7 +57,7 @@ void send_selected_project_number_to_server(int client_fd)
     send(client_fd, project_id_str, sizeof(project_id_str), 0);    
 }
 
-int init_udp(char* udp_port_str)
+int init_udp(char* udp_port_str, struct sockaddr_in udp_sin)
 {
     int udp_socket_fd;
     if ((udp_socket_fd = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
@@ -83,11 +83,6 @@ int init_udp(char* udp_port_str)
         exit(EXIT_FAILURE);        
     }
 
-    struct sockaddr_in udp_sin;
-    udp_sin.sin_family = AF_INET;
-    udp_sin.sin_port = htons(atoi(udp_port_str));
-    udp_sin.sin_addr.s_addr = inet_addr("255.255.255.255");
-
     if (bind(udp_socket_fd, (struct sockaddr *)&udp_sin, sizeof(udp_sin)) == -1)
     {
         const char* udp_bind_error_msg = "UDP Bind Error!\n";
@@ -99,6 +94,71 @@ int init_udp(char* udp_port_str)
     write(1, udp_success_msg, strlen(udp_success_msg));
 
     return udp_socket_fd;
+}
+
+void run_project_market(int my_id, int udp_fd, struct sockaddr_in udp_sin)
+{
+    int min_price = 999999999;
+    int is_first_time = 1;
+    int winner = 0;
+    int count = 0;
+    int turn = 0;
+    write(1, LINE_BREAKER, strlen(LINE_BREAKER));
+    const char* deal_start_msg = "Deal Making started!\n";
+    write(1, deal_start_msg, strlen(deal_start_msg));
+    while(count != 4)
+    {
+        if (turn == my_id)
+        {
+            const char* enter_your_price_msg = "It's Your Turn, Enter Your Suggested Price: ";
+            write(1, enter_your_price_msg, strlen(enter_your_price_msg));
+            char price_str[20] = {0};
+            read(0, price_str, 20);
+            sendto(udp_fd, price_str, strlen(price_str), 0,(struct sockaddr *)&udp_sin, sizeof(udp_sin));
+        }
+        else
+        {
+            const char* player_number = "Player Number: ";
+            write(1, player_number, strlen(player_number));
+            write(1, int_to_str(turn), strlen(int_to_str(turn)));
+            const char* is_choosing = " Is Currently Choosing His/Her Price\n";
+            write(1, is_choosing, strlen(is_choosing));
+            char price_str[20] = {0};
+            recv(udp_fd, price_str, 20, 0);
+            const char* player_chose = "Player Chose Price: ";
+            write(1, player_chose, strlen(player_chose));
+            write(1, price_str, strlen(price_str));
+            write(1, "\n", 2);
+            int price = atoi(price_str);
+            if (price < min_price)
+            {
+                min_price = price;
+                if (is_first_time)
+                {
+                    is_first_time = 0;
+                    count++;
+                }
+                else
+                {
+                    count = 0;
+                    winner = turn;
+                }
+            }
+            else
+                count++;
+        }
+        turn++;
+        if (turn == 5)
+            turn = 0;
+    }
+    const char* winner_is_msg = "Winner Is Player Number: ";
+    write(1, winner_is_msg, strlen(winner_is_msg));
+    write(1, int_to_str(winner), strlen(int_to_str(winner)));
+    const char* with_price_msg = " With Price: ";
+    write(1, with_price_msg, strlen(with_price_msg));
+    write(1, int_to_str(min_price), strlen(int_to_str(min_price)));
+    write(1, "\n", 2);
+    // TODO: send to server
 }
 
 void run_client(int port)
@@ -122,8 +182,13 @@ void run_client(int port)
 
     write_port_id_msg(udp_port_str, id_str);
 
-    int udp_socket_fd = init_udp(udp_port_str);
+    struct sockaddr_in udp_sin;
+    udp_sin.sin_family = AF_INET;
+    udp_sin.sin_port = htons(atoi(udp_port_str));
+    udp_sin.sin_addr.s_addr = inet_addr("255.255.255.255");
+    int udp_socket_fd = init_udp(udp_port_str, udp_sin);
 
+    run_project_market(atoi(id_str), udp_socket_fd, udp_sin);
 
     close(client_fd);
     close(udp_socket_fd);
