@@ -15,7 +15,7 @@ void run_client(int port)
     int client_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (client_fd == -1)
     {
-        const char* socket_creation_error_msg = "Socket Creation Error!";
+        const char* socket_creation_error_msg = "Socket Creation Error!\n";
         write(1, socket_creation_error_msg, strlen(socket_creation_error_msg));
         exit(EXIT_FAILURE);
     }
@@ -26,16 +26,22 @@ void run_client(int port)
 
     if (connect(client_fd,(struct sockaddr*)&server_sin, sizeof(server_sin)) == -1)
     {
-        const char* connect_error_msg = "Connect Error!";
+        const char* connect_error_msg = "Connect Error!\n";
         write(1, connect_error_msg, strlen(connect_error_msg));
         exit(EXIT_FAILURE);
     }
     const char* connection_success_msg = "Connected Successfully to Server!\n";
     write(1, connection_success_msg, strlen(connection_success_msg));
 
-    char buf[MAX_BUFFER_SIZE];
-    recv(client_fd, buf, MAX_BUFFER_SIZE, 0);
-    write(1, buf, strlen(buf));
+    char projects_info[MAX_BUFFER_SIZE];
+    recv(client_fd, projects_info, MAX_BUFFER_SIZE, 0);
+    write(1, projects_info, strlen(projects_info));
+
+    char project_id_str[5];
+    const char* select_project_msg = "Please Enter Your Desired Project ID(EXAMPLE:0):";
+    write(1, select_project_msg, strlen(select_project_msg));
+    read(0, project_id_str, 5);
+    send(client_fd, project_id_str, sizeof(project_id_str), 0);
     // while(read(0, buf, MAX_BUFFER_SIZE) != -1)
     // {
     //     send(client_fd, buf, sizeof(buf), 0);

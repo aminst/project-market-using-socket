@@ -1,5 +1,39 @@
 #include "Project.h"
 
+void add_user_to_project(int fd, int project_id, Project* projects)
+{
+    if (project_id >= PROJECTS_COUNT || project_id < 0)
+    {
+        const char* invalid_project_id_msg = "Invalid Project Id Requestd!\n";
+        write(1, invalid_project_id_msg, strlen(invalid_project_id_msg));
+    }
+    else if (projects[project_id].sold == 1)
+    {
+        const char* project_is_sold_msg = "Already Sold Project Requested!\n";
+        write(1, project_is_sold_msg, strlen(project_is_sold_msg));
+    }
+    else if (is_full(projects[project_id]))
+    {
+        const char* project_waiting_list_is_full_msg = "Full Project Waiting List Requested!\n";
+        write(1, project_waiting_list_is_full_msg, strlen(project_waiting_list_is_full_msg));
+    }
+    else{
+        for (int i = 0; i < WAITING_LIST_LIMIT; i++)
+        {
+            if (projects[project_id].waiting_list[i] == -1)
+            {
+                projects[project_id].waiting_list[i] = fd;
+                break;
+            }
+        }
+        char successfully_added_to_project_msg[200];
+        strcat(successfully_added_to_project_msg, "User Successfully added to Project ");
+        strcat(successfully_added_to_project_msg, int_to_str(project_id));
+        strcat(successfully_added_to_project_msg, "\n");
+        write(1, successfully_added_to_project_msg, strlen(successfully_added_to_project_msg));
+    }
+}
+
 int is_full(Project project)
 {
     return get_waiting_list_full_count(project) == WAITING_LIST_LIMIT ? 1 : 0;
