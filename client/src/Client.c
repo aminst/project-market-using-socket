@@ -34,10 +34,12 @@ void run_client(int port)
     write(1, connection_success_msg, strlen(connection_success_msg));
 
     char buf[MAX_BUFFER_SIZE];
-    while(read(0, buf, MAX_BUFFER_SIZE) != -1)
-    {
-        send(client_fd, buf, sizeof(buf), 0);
-    }
+    recv(client_fd, buf, MAX_BUFFER_SIZE, 0);
+    write(1, buf, strlen(buf));
+    // while(read(0, buf, MAX_BUFFER_SIZE) != -1)
+    // {
+    //     send(client_fd, buf, sizeof(buf), 0);
+    // }
 
     close(client_fd);    
 }

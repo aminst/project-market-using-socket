@@ -19,8 +19,24 @@ void write_server_startup_msg(int port)
     write(1, waiting_for_users_connect_msg, strlen(waiting_for_users_connect_msg));    
 }
 
+void send_available_projects_info(int fd, Project* projects)
+{
+    char projects_info[4000];
+    strcat(projects_info, LINE_BREAKER);
+    strcat(projects_info, "AVALIABLE PROJECTS LIST:\n");
+    for(int i = 0; i < PROJECTS_COUNT; i++)
+    {
+        if (projects[i].sold != 1 && !is_full(projects[i]))
+            strcat(projects_info, get_project_info(projects[i]));
+    }
+    strcat(projects_info, LINE_BREAKER);
+    send(fd, projects_info, strlen(projects_info), 0);
+}
+
 void run_server_on_port(int port)
 {
+    Project* projects = get_initial_projects();
+
     struct sockaddr_in server_sin;
 
     int server_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -68,6 +84,9 @@ void run_server_on_port(int port)
         write(1, accept_error_msg, strlen(accept_error_msg));
         exit(EXIT_FAILURE);
     }
+
+    send_available_projects_info(new_server_fd, projects);
+
     char buf[MAX_BUFFER_SIZE];
     while (1)
     {
