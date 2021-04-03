@@ -51,7 +51,7 @@ void write_server_startup_msg(int port)
 
 void send_available_projects_info(int fd, Project* projects)
 {
-    char projects_info[4000];
+    char projects_info[4000] = {0};
     strcat(projects_info, LINE_BREAKER);
     strcat(projects_info, "AVALIABLE PROJECTS LIST:\n");
     for(int i = 0; i < PROJECTS_COUNT; i++)
@@ -105,33 +105,46 @@ void run_server_on_port(int port)
 
     write_server_startup_msg(port);
 
+    fd_set all_set, read_fds;
+    int max_sd, new_server_fd;
     struct sockaddr_in client_sin;
     int client_in_len;
-    int new_server_fd = accept(server_fd, (struct sockaddr*)& client_sin, (socklen_t*)&client_in_len);
-    if (new_server_fd == -1)
-    {
-        const char* accept_error_msg = "Accept Error!\n";
-        write(1, accept_error_msg, strlen(accept_error_msg));
-        exit(EXIT_FAILURE);
+    FD_ZERO(&all_set);
+    max_sd = server_fd;
+    FD_SET(server_fd, &all_set);
+
+    while (1) {
+        read_fds = all_set;
+        select(max_sd + 1, &read_fds, NULL, NULL, NULL);
+
+        for (int i = 0; i <= max_sd; i++) {
+            if (FD_ISSET(i, &read_fds)) {
+                if (i == server_fd) {
+                    new_server_fd = accept(server_fd, (struct sockaddr *)&client_sin, (socklen_t*)&client_in_len);
+                    if (new_server_fd == -1)
+                    {
+                        const char* accept_error_msg = "Accept Error!\n";
+                        write(1, accept_error_msg, strlen(accept_error_msg));
+                        exit(EXIT_FAILURE);
+                    }       
+                    FD_SET(new_server_fd, &all_set);
+                    if (new_server_fd > max_sd)
+                        max_sd = new_server_fd;
+                    const char* user_accept_msg = "User Connected!\n";
+                    write(1, user_accept_msg, strlen(user_accept_msg));
+                    send_available_projects_info(new_server_fd, projects);
+                }
+                else {
+                    char project_id_str[5];
+                    recv(i , project_id_str, 5, 0);
+                    int is_group_ready = add_user_to_project(i, atoi(project_id_str), projects);
+                    if (is_group_ready)
+                        send_udp_port_to_group(atoi(project_id_str), projects);
+                    FD_CLR(i, &all_set);   
+                }
+            }
+        }
     }
 
-    const char* user_accept_msg = "User Connected!\n";
-    write(1, user_accept_msg, strlen(user_accept_msg));
-
-    send_available_projects_info(new_server_fd, projects);
-    char project_id_str[5];
-    recv(new_server_fd, project_id_str, sizeof(project_id_str), 0);
-
-    int is_group_ready = add_user_to_project(new_server_fd, atoi(project_id_str), projects);
-    if (is_group_ready)
-        send_udp_port_to_group(atoi(project_id_str), projects);
-
-    char buf[MAX_BUFFER_SIZE];
-    while (1)
-    {
-        // if ((client_in_len = recv(new_server_fd, buf, sizeof(buf), 0)))
-        //     write(1, buf, strlen(buf));
-    }
     close(server_fd);
-    close(new_server_fd);
 }

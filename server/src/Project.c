@@ -26,7 +26,7 @@ int add_user_to_project(int fd, int project_id, Project* projects)
                 break;
             }
         }
-        char successfully_added_to_project_msg[200];
+        char successfully_added_to_project_msg[200] = {0};
         strcat(successfully_added_to_project_msg, "User Successfully added to Project ");
         strcat(successfully_added_to_project_msg, int_to_str(project_id));
         strcat(successfully_added_to_project_msg, "\n");

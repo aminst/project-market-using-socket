@@ -43,17 +43,14 @@ void run_client(int port)
     read(0, project_id_str, 5);
     send(client_fd, project_id_str, sizeof(project_id_str), 0);
 
+    const char* wait_for_other_users_msg = "Now Wait For Other Users To Join!\n";
+    write(1, wait_for_other_users_msg, strlen(wait_for_other_users_msg));
+
     char udp_port_id[50];
     recv(client_fd, udp_port_id, 50, 0);
 
     char* udp_port_str = strtok(udp_port_id, "|");
     char* id_str = strtok(NULL, "|");
-
-    
-    // while(read(0, buf, MAX_BUFFER_SIZE) != -1)
-    // {
-    //     send(client_fd, buf, sizeof(buf), 0);
-    // }
 
     close(client_fd);    
 }
