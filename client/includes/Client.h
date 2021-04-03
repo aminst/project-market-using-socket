@@ -18,7 +18,7 @@
 int get_server_port(int argc, char* argv[]);
 void run_client(int port);
 int connect_to_server(int port);
-void send_selected_project_number(int client_fd);
+void send_selected_project_number_to_server(int client_fd);
 
 int init_udp(char* udp_port_str);
 
