@@ -48,7 +48,7 @@ int connect_to_server(int port)
     return client_fd;
 }
 
-void send_selected_project_number(int client_fd)
+void send_selected_project_number_to_server(int client_fd)
 {
     char project_id_str[5];
     const char* select_project_msg = "Please Enter Your Desired Project ID(EXAMPLE:0):";
@@ -109,7 +109,7 @@ void run_client(int port)
     recv(client_fd, projects_info, MAX_BUFFER_SIZE, 0);
     write(1, projects_info, strlen(projects_info));
 
-    send_selected_project_number(client_fd);
+    send_selected_project_number_to_server(client_fd);
 
     const char* wait_for_other_users_msg = "Now Wait For Other Users To Join!\n";
     write(1, wait_for_other_users_msg, strlen(wait_for_other_users_msg));
@@ -124,5 +124,7 @@ void run_client(int port)
 
     int udp_socket_fd = init_udp(udp_port_str);
 
-    close(client_fd);    
+
+    close(client_fd);
+    close(udp_socket_fd);
 }
