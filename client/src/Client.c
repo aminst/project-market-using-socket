@@ -94,6 +94,10 @@ int init_udp(char* udp_port_str)
         write(1, udp_bind_error_msg, strlen(udp_bind_error_msg));
         exit(EXIT_FAILURE);
     }
+
+    const char* udp_success_msg = "Successfuly Initialized UDP Socket\n";
+    write(1, udp_success_msg, strlen(udp_success_msg));
+
     return udp_socket_fd;
 }
 
