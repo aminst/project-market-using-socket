@@ -13,8 +13,11 @@ OBJECTS = \
 
 all: Server
 
-Server: $(OBJECTS)
+Server: $(BUILD_DIR) $(OBJECTS)
 	$(CC) $(CFLAGS) $(OBJECTS) -o $(EXECUTABLE_FILE)
+
+$(BUILD_DIR):
+	mkdir build
 
 $(BUILD_DIR)/Main.o: $(SRC_DIR)/Main.c $(INCLUDE_DIR)/Server.h
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/Main.c -o $(BUILD_DIR)/Main.o

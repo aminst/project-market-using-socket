@@ -1,5 +1,36 @@
 #include "Server.h"
 
+int get_random_port()
+{
+    struct sockaddr_in addr;
+    int test_sock;
+    addr.sin_family = AF_INET; 
+    addr.sin_port = htons(0); 
+    test_sock = socket(AF_INET, SOCK_DGRAM, 0);
+    while (addr.sin_port == 0) {
+        bind(test_sock, (struct sockaddr *)&addr, sizeof(addr));
+        int len = sizeof(addr);
+        getsockname(test_sock, (struct sockaddr *)&addr, &len );
+    }
+    close(test_sock);
+    printf("%d", addr.sin_port);
+    return addr.sin_port;  
+}
+
+void send_udp_port_to_group(int project_id, Project* projects)
+{
+    int port = get_random_port();
+    for(int i = 0; i < WAITING_LIST_LIMIT; i++)
+    {
+        char buf[50] = {0};
+        strcat(buf, int_to_str(port));
+        strcat(buf, "|");
+        strcat(buf, int_to_str(i));
+        strcat(buf, "|");
+        send(projects[project_id].waiting_list[i], buf, strlen(buf), 0);
+    }
+}
+
 int get_server_port(int argc, char* argv[])
 {
     if (argc != 2)
@@ -92,7 +123,9 @@ void run_server_on_port(int port)
     char project_id_str[5];
     recv(new_server_fd, project_id_str, sizeof(project_id_str), 0);
 
-    add_user_to_project(new_server_fd, atoi(project_id_str), projects);
+    int is_group_ready = add_user_to_project(new_server_fd, atoi(project_id_str), projects);
+    if (is_group_ready)
+        send_udp_port_to_group(atoi(project_id_str), projects);
 
     char buf[MAX_BUFFER_SIZE];
     while (1)

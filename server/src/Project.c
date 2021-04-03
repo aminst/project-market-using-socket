@@ -1,6 +1,6 @@
 #include "Project.h"
 
-void add_user_to_project(int fd, int project_id, Project* projects)
+int add_user_to_project(int fd, int project_id, Project* projects)
 {
     if (project_id >= PROJECTS_COUNT || project_id < 0)
     {
@@ -31,7 +31,10 @@ void add_user_to_project(int fd, int project_id, Project* projects)
         strcat(successfully_added_to_project_msg, int_to_str(project_id));
         strcat(successfully_added_to_project_msg, "\n");
         write(1, successfully_added_to_project_msg, strlen(successfully_added_to_project_msg));
+        if (is_full(projects[project_id]))
+            return 1;
     }
+    return 0;
 }
 
 int is_full(Project project)

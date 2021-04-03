@@ -24,7 +24,7 @@ int get_waiting_list_full_count(Project project);
 int is_full(Project project);
 char* get_waiting_list_status(Project project);
 
-void add_user_to_project(int fd, int project_id, Project* projects);
+int add_user_to_project(int fd, int project_id, Project* projects);
 
 Project* get_initial_projects();
 

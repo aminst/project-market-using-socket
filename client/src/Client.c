@@ -42,6 +42,14 @@ void run_client(int port)
     write(1, select_project_msg, strlen(select_project_msg));
     read(0, project_id_str, 5);
     send(client_fd, project_id_str, sizeof(project_id_str), 0);
+
+    char udp_port_id[50];
+    recv(client_fd, udp_port_id, 50, 0);
+
+    char* udp_port_str = strtok(udp_port_id, "|");
+    char* id_str = strtok(NULL, "|");
+
+    
     // while(read(0, buf, MAX_BUFFER_SIZE) != -1)
     // {
     //     send(client_fd, buf, sizeof(buf), 0);
