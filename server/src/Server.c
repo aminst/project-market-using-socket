@@ -104,6 +104,19 @@ int run_tcp_socket(int port)
     return server_fd;
 }
 
+void write_project_winner(char* buf)
+{
+    char* project_number = strtok(buf, "$");
+    char* price = strtok(NULL, "$");
+    const char* project_number_msg = "Project Number: ";
+    write(1, project_number_msg, strlen(project_number_msg));
+    write(1, project_number, strlen(project_number));
+    const char* is_sold_msg = " Is Sold With Price: ";
+    write(1, is_sold_msg, strlen(is_sold_msg));
+    write(1, price, strlen(price));
+    write(1, "\n", 2);
+}
+
 void run_server_on_port(int port)
 {
     Project* projects = get_initial_projects();
@@ -142,11 +155,18 @@ void run_server_on_port(int port)
                     send_available_projects_info(new_server_fd, projects);
                 }
                 else {
-                    char project_id_str[5];
-                    recv(i , project_id_str, 5, 0);
-                    int is_group_ready = add_user_to_project(i, atoi(project_id_str), projects);
-                    if (is_group_ready)
-                        send_udp_port_to_group(atoi(project_id_str), projects);
+                    char buf[20] = {0};
+                    recv(i , buf, 20, 0);
+                    if (buf[0] == '$')
+                    {
+                        write_project_winner(buf);
+                    }
+                    else if (buf[0] == '#')
+                    {
+                        int is_group_ready = add_user_to_project(i, atoi(strtok(buf, "#")), projects);
+                        if (is_group_ready)
+                            send_udp_port_to_group(atoi(buf), projects);
+                    }
                     FD_CLR(i, &all_set);   
                 }
             }

@@ -27,5 +27,6 @@ int run_tcp_socket(int port);
 
 void write_server_startup_msg(int port);
 void send_available_projects_info(int fd, Project* projects);
+void write_project_winner(char* buf);
 
 #endif
